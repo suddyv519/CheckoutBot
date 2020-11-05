@@ -17,7 +17,7 @@ class Site(threading.Thread):
         self.web = Browser(showWindow=not headless, incognito=True)
         with open(config_filename) as task_file:
             self.T = load(task_file)
-            
+
 
     def wait(self, time):
         self.log('sleeping {} second(s)'.format(time))
@@ -32,8 +32,11 @@ class Site(threading.Thread):
     def get_products(self):
         self.log('getting some products')
         self.web.go_to(self.T["link"])
-        dt = datetime.datetime(2020, 11, 4, 19, 20, 0)
-        self.log('waiting...')
+        day = 4
+        hour = 19
+        minute = 36
+        dt = datetime.datetime(2020, 11, day, hour, minute, 0)
+        self.log(f'waiting until {hour}:{minute}')
         pause.until(dt)
 
     def add_to_cart(self):
@@ -52,15 +55,17 @@ class Site(threading.Thread):
         
         self.web.click(id="dwfrm_singleshipping_addressList")
         self.web.click(self.T["address"])
-        self.wait(0.5) #
+        self.wait(0.8) #
 
         self.web.click(id="dwfrm_billing_paymentMethods_creditCardList")
         self.web.click(self.T["card"])
         self.web.type(self.T["cvv"] , id="dwfrm_billing_paymentMethods_creditCard_cvn")
-        while not self.web.exists('Continue to Final Review', loose_match=False):
+        while not self.web.exists(id="checkoutContinuePaymentDelegator", loose_match=False):
             self.wait(0.02)
-        self.web.click('Continue to Final Review')
-        # self.wait()
+        self.web.click(id="checkoutContinuePaymentDelegator")
+
+        # UNCOMMENT TO PURCHASE        
+        # self.web.click(id="submitOrderButton")
 
     def run(self):
         self.login()
