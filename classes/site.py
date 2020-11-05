@@ -15,6 +15,9 @@ class Site(threading.Thread):
         self.start_time = time()
         self.log = Logger(tid).log
         self.web = Browser(showWindow=not headless, incognito=True)
+        self.gold_link = 'https://catalog.usmint.gov/basketball-hall-of-fame-2020-uncirculated-silver-dollar-20CD.html?cgid=silver-dollars#start=1'
+        self.silver_link = ''
+
         with open(config_filename) as task_file:
             self.T = load(task_file)
 
@@ -27,11 +30,11 @@ class Site(threading.Thread):
         self.web.go_to('https://catalog.usmint.gov/account-login')
         self.web.type(self.T["email"] , into='Login')
         self.web.type(self.T["password"] , into='Password')
-        self.web.click('Sign In')
+        self.web.click(id="login")
 
     def get_products(self):
         self.log('getting some products')
-        self.web.go_to(self.T["link"])
+        self.web.go_to(self.gold_link)
         day = 4
         hour = 19
         minute = 36
@@ -41,8 +44,10 @@ class Site(threading.Thread):
 
     def add_to_cart(self):
         self.log('adding product to cart', 'blue')
+        while not self.web.exists(classname="pid-20CD-08d2853220528877835e99432b", loose_match=False):
+            self.log('waiting for add to bag button to appear')
+            self.refresh()
         self.web.click('Add to Bag')
-        # self.wait()
 
     def checkout(self):
         self.log('checking out')
@@ -63,14 +68,13 @@ class Site(threading.Thread):
         while not self.web.exists(id="checkoutContinuePaymentDelegator", loose_match=False):
             self.wait(0.02)
         self.web.click(id="checkoutContinuePaymentDelegator")
-
-        # UNCOMMENT TO PURCHASE        
-        # self.web.click(id="submitOrderButton")
+       
+        # self.web.click(id="submitOrderButton") # UNCOMMENT TO PURCHASE 
 
     def run(self):
         self.login()
         self.get_products()
         self.add_to_cart()
         self.checkout()
-        self.wait(300)
+        self.wait(300) # COMMENT THIS OUT
         self.log('time to checkout: {} sec'.format(abs(self.start_time-time())), 'green')
