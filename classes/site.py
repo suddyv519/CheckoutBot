@@ -6,6 +6,7 @@ from classes.logger import Logger
 from classes.product import Product
 
 from webbot import Browser 
+import pause, datetime
 
 class Site(threading.Thread):
     def __init__(self, tid, config_filename, headless = False):
@@ -13,7 +14,7 @@ class Site(threading.Thread):
         self.tid = tid
         self.start_time = time()
         self.log = Logger(tid).log
-        self.web = Browser(showWindow=headless)
+        self.web = Browser(showWindow=not headless, incognito=True)
         with open(config_filename) as task_file:
             self.T = load(task_file)
         with open('config.json') as config_file:
@@ -32,6 +33,9 @@ class Site(threading.Thread):
     def get_products(self):
         self.log('getting some products')
         self.web.go_to(self.T["link"])
+        dt = datetime.datetime(2020, 11, 4, 19, 20, 0)
+        self.log('waiting...')
+        pause.until(dt)
 
     def add_to_cart(self):
         self.log('adding product to cart', 'blue')
@@ -46,14 +50,10 @@ class Site(threading.Thread):
         self.web.click(id="shipping-method")
         self.web.click('Next Day')
         self.wait(0.1)
-
-        # self.web.type(self.T["email"] , into='Login')
-        # self.web.type(self.T["password"] , into='Password')
-        # self.web.click('Checkout as Registered User')
         
         self.web.click(id="dwfrm_singleshipping_addressList")
         self.web.click(self.T["address"])
-        self.wait(0.5)
+        self.wait(0.5) #
 
         self.web.click(id="dwfrm_billing_paymentMethods_creditCardList")
         self.web.click(self.T["card"])
@@ -68,5 +68,5 @@ class Site(threading.Thread):
         self.get_products()
         self.add_to_cart()
         self.checkout()
-        self.wait(30)
+        self.wait(300)
         self.log('time to checkout: {} sec'.format(abs(self.start_time-time())), 'green')

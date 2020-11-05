@@ -14,15 +14,13 @@ def main():
     threads = []
     i = 0
     for config in listdir('tasks'):
-        if config in {'task.example.json'}:  # configs to ignore
+        if config in {'task.example.json', 'peter.json', 'crombie.json'}:  # configs to ignore
             pass
         else:
             log('loading thread {} with config {}'.format(i, config))
-            threads.append(Site(i, 'tasks/' + config, True))
+            threads.append(Site(i, 'tasks/' + config, headless=False))
             threads[i].start()
             i += 1
-    # threads.append(Site(1, 'tasks/task.json', True))
-    # threads[1].start()
 
 
 if __name__ == '__main__':
