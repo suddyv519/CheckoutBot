@@ -17,8 +17,7 @@ class Site(threading.Thread):
         self.web = Browser(showWindow=not headless, incognito=True)
         with open(config_filename) as task_file:
             self.T = load(task_file)
-        with open('config.json') as config_file:
-            self.C = load(config_file)
+            
 
     def wait(self, time):
         self.log('sleeping {} second(s)'.format(time))
