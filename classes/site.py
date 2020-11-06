@@ -36,28 +36,30 @@ class Site(threading.Thread):
         self.log('getting some products')
         self.web.go_to(self.gold_link)
         day = 4
-        hour = 19
-        minute = 36
+        hour = 20
+        minute = 0
         dt = datetime.datetime(2020, 11, day, hour, minute, 0)
         self.log(f'waiting until {hour}:{minute}')
         pause.until(dt)
 
     def add_to_cart(self):
+        # while self.web.exists(classname="acsClassicInner"):
+        #     self.log('survey pop up detected')
+        #     self.web.refresh()
         self.log('adding product to cart', 'blue')
-        while not self.web.exists(classname="pid-20CD-08d2853220528877835e99432b", loose_match=False):
+        while not self.web.exists('Add to Bag', loose_match=False):
             self.log('waiting for add to bag button to appear')
             self.refresh()
         self.web.click('Add to Bag')
 
     def checkout(self):
         self.log('checking out')
-        while not self.web.exists('Checkout', loose_match=False):
-            self.wait(0.02)
-        self.web.click('Checkout')
+        self.web.click(classname="mini-cart-link")
         self.web.click(id="shipping-method")
         self.web.click('Next Day')
         self.wait(0.1)
         
+        # self.wait(300)
         self.web.click(id="dwfrm_singleshipping_addressList")
         self.web.click(self.T["address"])
         self.wait(0.8) #
@@ -66,15 +68,16 @@ class Site(threading.Thread):
         self.web.click(self.T["card"])
         self.web.type(self.T["cvv"] , id="dwfrm_billing_paymentMethods_creditCard_cvn")
         while not self.web.exists(id="checkoutContinuePaymentDelegator", loose_match=False):
-            self.wait(0.02)
+            self.log('waiting for checkout button')
+            self.wait(0.01)
         self.web.click(id="checkoutContinuePaymentDelegator")
        
-        # self.web.click(id="submitOrderButton") # UNCOMMENT TO PURCHASE 
+        ############# self.web.click(id="submitOrderButton") # UNCOMMENT TO PURCHASE 
 
     def run(self):
         self.login()
         self.get_products()
         self.add_to_cart()
         self.checkout()
-        self.wait(300) # COMMENT THIS OUT
+        # self.wait(3000) 
         self.log('time to checkout: {} sec'.format(abs(self.start_time-time())), 'green')

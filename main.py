@@ -14,7 +14,7 @@ def main():
     threads = []
     i = 0
     for config in listdir('tasks'):
-        if config in {'task.example.json', 'peter.json', 'crombie.json'}:  # configs to ignore
+        if config in {'me.json', 'peter.json'}:  # configs to ignore
             pass
         else:
             log('loading thread {} with config {}'.format(i, config))
